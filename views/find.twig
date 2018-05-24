@@ -1,0 +1,12 @@
+{% if jobs.length > 0 %}
+<h3>Choisissez dans la liste le métier qui vous plait</h3>
+    {% for job in jobs %}
+        <a href="/view/{{searchId}}/{{job.id}}"><p>{{job.title}}</p></a>
+    {% endfor %}
+    <a href="/">Cliquez sur ce lien pour faire une autre recherche</a>
+{% else %}
+    <p>Aucun job trouvé pour votre recherche</p>
+
+
+    <a href="/">Cliquez sur ce lien pour faire une autre recherche</a>
+{% endif %}

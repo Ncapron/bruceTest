@@ -1,0 +1,15 @@
+{
+    "debug": false,
+    "host": "http://localhost:1606",
+    "port": "1606",
+    "mongo": {
+        "bdd": "bruceTest",
+        "host": "localhost",
+        "port": "27017"
+    },
+    "security": {
+        "session": {
+            "secret": "bruceTest-secret"
+        }
+    }
+}
