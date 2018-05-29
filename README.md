@@ -31,6 +31,6 @@ Node JS :
 
 Il te sera demandé de remplir le input et d'appuyer sur "rechercher"
 
-S'il y a un match ou plusieurs match avec l'Api une liste s'affichera, chaque ligne est cliquable et gardera en bdd le choix que tu as fait en bdd. (/search)
+S'il y a un match ou plusieurs match avec l'Api une liste s'affichera, chaque ligne est cliquable et gardera le choix que tu as fait en bdd. (/search)
 
 En cas de non match avec l'api, le text brut est enregistré et un compteur est incrémenté à chaque demande de ce text. (/learn)
