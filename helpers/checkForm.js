@@ -13,7 +13,7 @@ const checkForm = {
                 let results = [];
                 let search = form.userSearch.charAt(0).toUpperCase() + form.userSearch.slice(1);
                 async.each(jobs, function(job, cback){
-                    if (natural.JaroWinklerDistance(search,job.title) > 0.58) {
+                    if (natural.JaroWinklerDistance(search,job.title) > 0.52) {
                         results.push(job.id);
                     }
                     return cback();
