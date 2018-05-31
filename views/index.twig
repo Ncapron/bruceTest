@@ -1,6 +1,30 @@
-<p>Remplissez ce champ voir les posts disponible (promis ça vous prendra moins d'une minute)</p>
+{% extends 'base.twig' %}
 
-<form action="/check" method="post">
-    <input type="text" name="userSearch" value="">
-    <input type="submit" name="" value="Rechercher">
-</form>
+{% block content %}
+
+     <div id="items_list">
+         <div class="col-sm-6 mt10 text-right">
+             <input type="text" class="form-control input-sm" name="userSearch" aria-controls="table" value="{{ searchString }}"> <button id="search" type="button" name="button">Rechercher</button>
+         </div>
+        {% include 'find.twig' %}
+        {% include '../paginate/filter.twig' %}
+    </div>
+
+
+
+{% endblock content %}
+
+{% block js %}
+    <script type="text/javascript">
+        $('#search').on('click', function (req) {
+            let search = $("input[type=text][name=userSearch]").val();
+            $.get('/?userSearch='+search
+            ).done(function (response) {
+                console.log(response);
+                $('#items_list').html(response);
+            }).fail(function (response) {
+                console.log('error');
+            });
+        });
+    </script>
+{% endblock js %}

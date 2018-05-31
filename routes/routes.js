@@ -1,18 +1,12 @@
 const express   = require('express');
 const router    = express.Router();
-
+const paginate  = require('paginate/paginate');
 const IndexController = require('controllers/IndexController');
+
+router.use(paginate.middleware(10, 100));
 
 router.get('/', IndexController.index);
 
-router.get('/api', IndexController.api);
-
-router.post('/check', IndexController.check);
-
-router.get('/search', IndexController.search);
-
-router.get('/learn', IndexController.learn);
-
-router.get('/view/:searchId/:jobId', IndexController.view);
+router.get('/view/:id/:searchId', IndexController.view);
 
 module.exports = router;

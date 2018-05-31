@@ -1,111 +1,94 @@
 const config    = require('config');
+const mongoose  = require('mongoose');
 const async     = require('async');
 const jobModel  = require('models/job');
 const searchModel  = require('models/search');
+const paginate  = require('paginate/paginate');
 const request   = require('request');
 const checkForm = require('helpers/checkForm');
 const _ = require('lodash');
 
 const controller = {
     index: function (req, res) {
-        return res.render('index.twig');
-    },
-    api: function(req, res) {
         async.waterfall([
-            function getData(callback){
-                jobModel.find({}, function(err, data){
+            function getElements(callback) {
+                const page = req.query.page;
+                const limit = req.query.limit;
+                const query = {};
+                if (req.query.userSearch) {
+                    const searchRegex = new RegExp('\\b' + req.query.userSearch + '.*', 'i');
+                    query.title = {$regex: searchRegex};
+                }
+                jobModel.paginate(query, {page: page, limit: limit, sort: {created_at: -1}}, function (err, jobs) {
                     if (err) {
                         return callback(err);
                     }
+                    const data = {
+                        userSearch: req.body.userSearch,
+                        items: jobs.docs,
+                        pageCount: jobs.pages,
+                        itemCount: jobs.limit,
+                        currentPage: jobs.page,
+                        total: jobs.total,
+                        pages: paginate.getArrayPages(req)(5, jobs.pages, req.query.page)
+                    };
+
                     return callback(null, data);
                 });
+            },
+            function checkData(data, callback){
+                const userSearch = req.query.userSearch;
+                if (!userSearch) {
+                    return callback(null, data);
+                } else if (userSearch && data.total == 0) {
+                    controller.learn(data, userSearch, callback);
+                } else {
+                    controller.search(data, userSearch, callback);
+                }
             }
-        ], function(err, data){
-            if (err) {
-                console.log(err);
-            }
-            return res.json(data);
+        ], function (err, data) {
+            return res.render('index.twig', data);
         });
     },
-    check: function(req, res) {
-        async.waterfall([
-            function getApi(callback){
-                request('http://localhost:1606/api', function (error, response, body) {
-                    if (error) {
-                        return callback(error);
-                    }
-                    return callback(null, JSON.parse(body));
-                });
-            },
-            function checkData(jobs, callback){
-                checkForm.pourcent(req.body, jobs, callback);
-            }
-        ], function(err, results){
+    learn: function(data, userSearch, callback){
+        searchModel.findOne({userSearch: userSearch}, function(err, search){
             if (err) {
-                console.log('err', err);
-            } else if (_.isEmpty(results)) {
-                return res.redirect('/learn?userSearch='+req.body.userSearch);
-            } else {
-                return res.redirect('/search?userSearch='+req.body.userSearch+'&results='+results);
-            }
-        });
-    },
-    search: function(req, res) {
-        const ids = req.query.results ? req.query.results.split(',') : [];
-        async.waterfall([
-            function getIds(callback){
-                jobModel.find({ id: { $in: ids }}).exec(function (err, jobs) {
-                    return callback(null, jobs, ids);
-                });
-            },
-            function storeMatches(jobs, ids, callback){
+                return callback(err);
+            } else if (search == null || _.isEmpty(search)) {
                 let Store = {
-                    userSearch : req.query.userSearch,
-                    matches : ids
+                    userSearch : userSearch,
                 };
-                searchModel.create(Store, function(err, data){
-                    return callback(err, jobs, data._id);
+                searchModel.create(Store, function(err){
+                    return callback(err, data);
+                });
+            } else {
+                let count = search.count + 1;
+                searchModel.update({userSearch: userSearch}, {count: count}, function(err){
+                    return callback(err, data);
                 });
             }
-        ], function(err, jobs, id){
-            if (err) {
-                console.log(err);
-            }
-            return res.render('find.twig', {jobs:jobs, searchId: id});
         });
     },
-    learn: function(req, res) {
-        async.waterfall([
-            function storeMatches(callback){
-                searchModel.findOne({userSearch: req.query.userSearch}, function(err, data){
-                    if (err) {
-                        console.log('a');
-                        return callback(err);
-                    } else if (data == null || _.isEmpty(data)) {
-                        let Store = {
-                            userSearch : req.query.userSearch,
-                        };
-                        searchModel.create(Store, function(err){
-                            return callback(err);
-                        });
-                    } else {
-                        let count = data.count + 1;
-                        searchModel.update({userSearch: req.query.userSearch}, {count: count}, function(err){
-                            return callback(err);
-                        });    
-                    }
-                });
-            }
-        ], function(err){
-            return res.render('find.twig');
+    search: function(data, userSearch, callback) {
+        let Store = {
+            userSearch : userSearch,
+            matches : data.items
+        };
+        searchModel.create(Store, function(err, search){
+            data.searchId = search._id;
+            return callback(err, data, search);
         });
     },
     view: function(req, res) {
-        console.log(req.params);
         async.waterfall([
             function getIds(callback){
-                searchModel.findOneAndUpdate({_id: req.params.searchId}, {$set:{chosen : req.params.jobId}} , function(err){
-                    return callback(err);
+                jobModel.findOne({_id: req.params.id}, function(err, job) {
+                    if (err) {
+                        return callback(err);
+                    }
+                    searchModel.update({_id: req.params.searchId}, {chosen: job.title}, function(err){
+                        return callback(err);
+                    });
                 });
             }
         ], function(err){

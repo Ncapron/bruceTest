@@ -6,6 +6,13 @@ var modelSchema = new mongoose.Schema({
     created_at  : { type : Date, default : Date.now() }
 });
 
-var model = mongoose.model('job', modelSchema);
+// indexed fields
+modelSchema.index({title: 'text'});
+
+
+// plugin paginate
+modelSchema.plugin(require('mongoose-paginate'));
+
+const model = mongoose.model('job', modelSchema);
 
 module.exports = model;

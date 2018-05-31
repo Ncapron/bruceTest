@@ -1,0 +1,42 @@
+{% if total > 0 %}
+    <div class="paginate_info" id="paginate_info" role="status" aria-live="polite">
+        Affichage de l'élément {{ ((paginate.page-1)*paginate.limit) + 1 }} à {{ paginate.hasNextPages(pageCount) ? (paginate.page)*paginate.limit : total }} sur {{total}} élément{{ total > 1  ? 's' }}
+    </div>
+{% else %}
+    <div class="paginate_info" id="paginate_info" role="status" aria-live="polite">
+        Aucun élément à afficher.
+    </div>
+{% endif %}
+
+{% if paginate.hasPreviousPages or paginate.hasNextPages(pageCount) %}
+    <nav class="nav navbar-nav">
+        <ul class="pagination">
+
+            {% if paginate.hasPreviousPages %}
+                <li>
+                    <a href="{{ paginate.href(true) }}" aria-label="Previous">
+                        <small>précedent</small>
+                    </a>
+                </li>
+
+            {% endif %}
+
+            {% if pages %}
+                {% for page in pages %}
+                    <li class="{{ page.number == paginate.page ? 'active' }}">
+                        <a href="{{ page.url }}">{{ page.number }}</a>
+                    </li>
+                {% endfor %}
+            {% endif %}
+
+            {% if paginate.hasNextPages(pageCount) %}
+                <li>
+                    <a href="{{ paginate.href() }}" aria-label="Next">
+                        <small>suivant</small>
+                    </a>
+                </li>
+            {% endif %}
+
+        </ul>
+    </nav>
+{% endif %}
