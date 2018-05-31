@@ -5,7 +5,6 @@ const jobModel  = require('models/job');
 const searchModel  = require('models/search');
 const paginate  = require('paginate/paginate');
 const request   = require('request');
-const checkForm = require('helpers/checkForm');
 const _ = require('lodash');
 
 const controller = {
@@ -24,7 +23,7 @@ const controller = {
                         return callback(err);
                     }
                     const data = {
-                        userSearch: req.body.userSearch,
+                        userSearch: req.query.userSearch,
                         items: jobs.docs,
                         pageCount: jobs.pages,
                         itemCount: jobs.limit,
@@ -37,7 +36,7 @@ const controller = {
                 });
             },
             function checkData(data, callback){
-                const userSearch = req.query.userSearch;
+                const userSearch = data.userSearch;
                 if (!userSearch) {
                     return callback(null, data);
                 } else if (userSearch && data.total == 0) {
