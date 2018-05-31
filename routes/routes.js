@@ -9,4 +9,6 @@ router.get('/', IndexController.index);
 
 router.get('/view/:id/:searchId', IndexController.view);
 
+router.get('/jobList/:id', IndexController.job);
+
 module.exports = router;

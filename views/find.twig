@@ -1,5 +1,9 @@
 {% block content %}
     {% for item in items %}
+    {% if searchId %}
         <a href="/view/{{item._id}}/{{searchId}}"><p>{{item.title}}</p></a>
+    {% else %}
+        <a href="/jobList/{{item._id}}"><p>{{item.title}}</p></a>
+    {% endif %}
     {% endfor %}
 {% endblock content %}

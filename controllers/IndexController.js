@@ -94,6 +94,20 @@ const controller = {
         ], function(err){
             return res.redirect('/');
         });
+    },
+    job: function(req, res) {
+        async.waterfall([
+            function getIds(callback){
+                jobModel.findOne({_id: req.params.id}, function(err, job) {
+                    return callback(err, job);
+                });
+            }
+        ], function(err, job){
+            if (err) {
+                console.log(err);
+            }
+            return res.render('job.twig', {job:job});
+        });
     }
 };
 
